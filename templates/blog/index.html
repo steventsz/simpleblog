@@ -1,0 +1,21 @@
+<html>
+<head>Home</head>
+<body>
+<h1>welcome to my blog</h1>
+<p>Checkout my latest post blow:</p>
+<ul>
+    {% for category in categories %}
+    <li>
+        <a herf="">
+            {{ category.name }}
+        </a>
+        <ul>
+            {% for post in category.post_set.all %}
+                <li>{{ post.title }}</li>
+            {% endfor %}
+        </ul>
+    </li>
+    {% endfor %}
+</ul>
+</body>
+</html>
