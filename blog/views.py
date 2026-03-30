@@ -1,8 +1,9 @@
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
+from blog.forms import CreatePostForm, PostUpdateForm
 from blog.models import Category, Post
 
 
@@ -54,5 +55,18 @@ class PostDetailView(DetailView):
 class PostCreateView(CreateView):
     model = Post
     template_name = 'blog/post_create.html'
-    fields = ['title', 'body', 'category', 'snippet', 'header_image', 'auther']
+    # fields = ['title', 'body', 'category', 'snippet', 'header_image', 'auther']
+    form_class = CreatePostForm
+    success_url = reverse_lazy('post_list')
+
+class PostUpdateView(UpdateView):
+    model = Post
+    template_name = 'blog/post_update.html'
+    # fields = ['title', 'body', 'category', 'snippet', 'header_image', 'auther']
+    form_class = PostUpdateForm
+    success_url = reverse_lazy('post_list')
+
+class PostDeleteView(DeleteView):
+    model = Post
+    template_name = 'blog/post_delete.html'
     success_url = reverse_lazy('post_list')
