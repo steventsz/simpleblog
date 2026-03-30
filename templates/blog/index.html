@@ -6,6 +6,11 @@
 Welcome to Simple Blog
 
 <h1>Welcome to Simple Blog</h1>
+    {% if user.is_authenticated %}
+        <p>Hello {{ user.username }}</p>
+{#    {% else %}#}
+{#        <p>Please <a href="{% url 'login' %}">login</a> to view the posts.</p>#}
+    {% endif %}
 <p>Check out our latest posts below:</p >
 <ul>
     {% for category in categories %}
