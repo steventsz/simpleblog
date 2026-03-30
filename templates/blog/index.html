@@ -1,21 +1,25 @@
-<html>
-<head>Home</head>
-<body>
-<h1>welcome to my blog</h1>
-<p>Checkout my latest post blow:</p>
+{% extends 'base.html' %}
+{% block title %}
+    Home
+{% endblock %}
+{% block content %}
+Welcome to Simple Blog
+
+<h1>Welcome to Simple Blog</h1>
+<p>Check out our latest posts below:</p >
 <ul>
     {% for category in categories %}
     <li>
-        <a herf="">
+        <a href="{% url 'category_detail' category.id %}">
             {{ category.name }}
-        </a>
+        </a >
         <ul>
-            {% for post in category.post_set.all %}
-                <li>{{ post.title }}</li>
-            {% endfor %}
+        {% for post in category.post_set.all %}
+            <li>{{ post.title }}</li>
+        {% endfor %}
         </ul>
     </li>
     {% endfor %}
 </ul>
-</body>
-</html>
+
+{% endblock %}
