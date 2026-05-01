@@ -7,7 +7,7 @@
 
 {% block content %}
     {% if user.is_authenticated %}
-        <a herf="{% url 'post_delete' %}" class="btn btn-success">Create New Post</a>
+        <a href="{% url 'post_create' %}" class="btn btn-success">Create New Post</a>
     {% endif %}
     <a href="{% url 'post_create' %}" class="btn btn-success">Create New Post</a>
     <ul>

@@ -1,10 +1,15 @@
+from csv import excel
+
+import pandas as pd
 from django.contrib.auth.models import User
+from django.core.files.storage import FileSystemStorage
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
 from blog.forms import CreatePostForm, PostUpdateForm
-from blog.models import Category, Post
+from blog.models import Category, Post, UserProfile, Comments
+from blog.utils import create_user
 
 
 # Create your views here.
@@ -75,8 +80,63 @@ def register(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
-        user = User.objects.create_user(username=username)
-        user.set_password(password)
-        user.save()
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        email = request.POST['email']
+        github_url = request.POST['github_url']
+        linkedin_url = request.POST['linkedin_url']
+
+        create_user(username,password,first_name,last_name,email,github_url,linkedin_url)
         return redirect('login')
     return render(request, 'registration/register.html')
+
+def create_users(request):
+    if request.method == 'POST' and request.FILES['names_file']:
+        names_file = request.FILES['names_file']
+        fs = FileSystemStorage()
+        filename = fs.save(names_file.name, names_file) # save my file to media folder
+        uploaded_file_url = fs.url(filename)
+        uploaded_file_path = fs.path(filename) # get the url of the file
+        print(uploaded_file_path)
+        excel_read = pd.read_excel(uploaded_file_path)
+        data = pd.DataFrame(excel_read, columns=['username',
+                                                 'password',
+                                                 'first_name',
+                                                 'last_name',
+                                                 'email',
+                                                 'github',
+                                                 'linkedin'])
+        usernames = data['username'].to_list()
+        passwords = data['password'].to_list()
+        first_names = data['first_name'].to_list()
+        last_names = data['last_name'].to_list()
+        emails = data['email'].to_list()
+        github_urls = data['github'].to_list()
+        linkedin_urls = data['linkedin'].to_list()
+        for username, password, first_name, last_name, email, github_url, linkedin_url in zip(usernames, passwords, first_names, last_names, emails, github_urls, linkedin_urls):
+            try:
+                user = User.objects.get(username=username)
+                user.delete()
+                create_user(username, password, first_name, last_name, email, github_url, linkedin_url)
+            except User.DoesNotExist:
+                create_user(username, password, first_name, last_name, email, github_url, linkedin_url)
+
+
+        return render(request, 'blog/create_users.html', {'uploaded_file_url': uploaded_file_url})
+    return render(request, 'blog/create_users.html')
+
+def likes_unlikes(request, post_id):
+    post = Post.objects.get(id=post_id)
+    if request.user in post.likes.all():
+        post.likes.remove(request.user)
+    else:
+        post.likes.add(request.user)
+    return redirect('post_detail_view', pk=post.id)
+
+def add_comments(request,post_id):
+    if request.method == 'POST':
+        comment_body = request.POST['comment_body']
+        comment = Comments.objects.create(post=Post.objects.get(id=post_id),
+                                          user=request.user,
+                                          comment_body=comment_body)
+        return redirect('post_detail_view', pk=post_id)
